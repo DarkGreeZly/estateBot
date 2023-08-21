@@ -42,7 +42,9 @@ async def continues(message: types.Message):
 
 @dp.message_handler(text="Звернутися в підтримку")
 async def support(message: types.Message):
+    global sent
     if not sent:
+        sent = True
         await bot.send_message(message.from_user.id, "Напишіть ваше ім'я та прізвище")
         @dp.message_handler()
         async def fullName(message: types.Message):
