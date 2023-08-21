@@ -1,5 +1,3 @@
-import json
-
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
@@ -10,6 +8,7 @@ bot = Bot(token="6339639367:AAFfRK1z6yhvaLTq55C8I42lpNUAgTEeGbM")
 dp = Dispatcher(bot)
 inline = CallbackData("post", "action", "data")
 full_name, phone, email, complaint, user = '', '', '', '', ''
+sent = False
 
 
 @dp.message_handler(commands=['start'])
@@ -43,33 +42,36 @@ async def continues(message: types.Message):
 
 @dp.message_handler(text="Звернутися в підтримку")
 async def support(message: types.Message):
-    await bot.send_message(message.from_user.id, "Напишіть ваше ім'я та прізвище")
-    @dp.message_handler()
-    async def fullName(message: types.Message):
-        global full_name, phone, email, complaint, user
-        user = message.from_user.id
-        if full_name == '':
-            full_name = message.text
+    if not sent:
+        await bot.send_message(message.from_user.id, "Напишіть ваше ім'я та прізвище")
+        @dp.message_handler()
+        async def fullName(message: types.Message):
+            global full_name, phone, email, complaint, user
+            user = message.from_user.id
+            if full_name == '':
+                full_name = message.text
 
-            phone_butt = types.KeyboardButton("Відправити номер телефону", request_contact=True)
-            mar = types.ReplyKeyboardMarkup(resize_keyboard=True).add(phone_butt)
-            await bot.send_message(message.from_user.id, "Відправте ваш номер телефону", reply_markup=mar)
-        elif email == '':
-            email = message.text
-            await bot.send_message(message.from_user.id, "Напишіть ваше повідомлення")
-        elif complaint == '':
-            complaint = message.text
-            send = types.InlineKeyboardButton("Відправити📩", callback_data="complaint")
-            send_mar = types.InlineKeyboardMarkup().add(send)
-            await bot.send_message(message.from_user.id, f"{full_name}\n"
-                                                            f"{phone}\n"
-                                                            f"{email}\n"
-                                                            f"{complaint}", reply_markup=send_mar)
-        @dp.message_handler(content_types=types.ContentType.CONTACT)
-        async def phone_func(message: types.Message):
-            global phone
-            phone = str(message.contact.phone_number)
-            await bot.send_message(message.from_user.id, "Напишіть вашу почту")
+                phone_butt = types.KeyboardButton("Відправити номер телефону", request_contact=True)
+                mar = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(phone_butt)
+                await bot.send_message(message.from_user.id, "Відправте ваш номер телефону", reply_markup=mar)
+            elif email == '':
+                email = message.text
+                await bot.send_message(message.from_user.id, "Напишіть ваше повідомлення")
+            elif complaint == '':
+                complaint = message.text
+                send = types.InlineKeyboardButton("Відправити📩", callback_data="complaint")
+                send_mar = types.InlineKeyboardMarkup().add(send)
+                await bot.send_message(message.from_user.id, f"{full_name}\n"
+                                                                f"{phone}\n"
+                                                                f"{email}\n"
+                                                                f"{complaint}", reply_markup=send_mar)
+            @dp.message_handler(content_types=types.ContentType.CONTACT)
+            async def phone_func(message: types.Message):
+                global phone
+                phone = str(message.contact.phone_number)
+                await bot.send_message(message.from_user.id, "Напишіть вашу почту")
+    else:
+        await bot.send_message(message.from_user.id, "Ваше повідомлення відправлено в роботу. Залишайтесь на зв’язку.")
 
 
 @dp.callback_query_handler(text=["complaint"])
