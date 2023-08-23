@@ -7,7 +7,7 @@ from aiogram.utils.callback_data import CallbackData
 bot = Bot(token="6339639367:AAFfRK1z6yhvaLTq55C8I42lpNUAgTEeGbM")
 dp = Dispatcher(bot)
 inline = CallbackData("post", "action", "data")
-full_name, phone, email, complaint, user = '', '', '', '', ''
+full_name, phone, email, complaint, user, deleting_mes, mess = '', '', '', '', '', types.Message, types.Message
 sent = False
 
 
@@ -22,7 +22,9 @@ async def start(message: types.Message):
 @dp.message_handler(text="Розпочати")
 @dp.message_handler(text="Назад🔙")
 async def continues(message: types.Message):
-    block1 = types.KeyboardButton("Підтвердження права вланості на майнo", callback_data="Підтвердження права вланості на майнo")
+    global mess
+    mess = message
+    block1 = types.KeyboardButton("Підтвердження права власності на майнo", callback_data="Підтвердження права власності на майнo")
     block2 = types.KeyboardButton("Фіксація ДСНС", callback_data="Фіксація ДСНС")
     block3 = types.KeyboardButton("Фіксація сільською/селищною міською радою, у разі їх відсутності військовою адміністрацією або військово-цивільною адміністрацією", callback_data="Фіксація сільською/селищною міською радою, у разі їх відсутності військовою адміністрацією або військово-цивільною адміністрацією")
     block4 = types.KeyboardButton("Фіксація НПУ", callback_data="Фіксація НПУ")
@@ -48,13 +50,12 @@ async def support(message: types.Message):
         await bot.send_message(message.from_user.id, "Напишіть ваше ім'я та прізвище")
         @dp.message_handler()
         async def fullName(message: types.Message):
-            global full_name, phone, email, complaint, user
+            global full_name, phone, email, complaint, user, deleting_mes
             user = message.from_user.id
             if full_name == '':
                 full_name = message.text
-
                 phone_butt = types.KeyboardButton("Відправити номер телефону", request_contact=True)
-                mar = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(phone_butt)
+                mar = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False).add(phone_butt)
                 await bot.send_message(message.from_user.id, "Відправте ваш номер телефону", reply_markup=mar)
             elif email == '':
                 email = message.text
@@ -63,7 +64,7 @@ async def support(message: types.Message):
                 complaint = message.text
                 send = types.InlineKeyboardButton("Відправити📩", callback_data="complaint")
                 send_mar = types.InlineKeyboardMarkup().add(send)
-                await bot.send_message(message.from_user.id, f"{full_name}\n"
+                deleting_mes = await bot.send_message(message.from_user.id, f"{full_name}\n"
                                                                 f"{phone}\n"
                                                                 f"{email}\n"
                                                                 f"{complaint}", reply_markup=send_mar)
@@ -74,10 +75,11 @@ async def support(message: types.Message):
                 await bot.send_message(message.from_user.id, "Напишіть вашу почту")
     else:
         await bot.send_message(message.from_user.id, "Ваше повідомлення відправлено в роботу. Залишайтесь на зв’язку.")
-
+        await continues(message)
 
 @dp.callback_query_handler(text=["complaint"])
 async def send_complaint(callback_data: types.CallbackQuery):
+    global mess
     work = types.InlineKeyboardButton("В роботі", callback_data="work")
     handled = types.InlineKeyboardButton("Оброблено", callback_data="handled")
     acceptance = types.InlineKeyboardButton("На підтвердження", callback_data="on_acceptance")
@@ -87,6 +89,8 @@ async def send_complaint(callback_data: types.CallbackQuery):
                                                                 f"Номер телефону: {phone}\n"
                                                                 f"Почта: {email}\n"
                                                                 f"Повідомлення: {complaint}", reply_markup=mar)
+    await bot.delete_message(callback_data.from_user.id, deleting_mes.message_id)
+    await continues(mess)
 
 
 @dp.callback_query_handler(text="work")
@@ -105,7 +109,7 @@ async def channel_handler(callback_data: types.CallbackQuery):
 
 
 
-@dp.message_handler(text="Підтвердження права вланості на майнo")
+@dp.message_handler(text="Підтвердження права власності на майнo")
 async def block1(message: types.Message):
     print(message)
     quest1 = types.KeyboardButton("Які основні правовстановлюючі документи підтверджують власність на майно?", callback_data="Які основні правовстановлюючі документи підтверджують власність на майно?")
@@ -119,12 +123,12 @@ async def block1(message: types.Message):
     quest9 = types.KeyboardButton("Якщо є копії документів про право власності чи потрібно відновлювати оригінали?", callback_data="Якщо є копії документів про право власності чи потрібно відновлювати оригінали?")
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, quest8, quest9, back)
-    await bot.send_message(text="Підтвердження права вланості на майнo", chat_id=message.from_user.id, reply_markup=mar)
+    await bot.send_message(text="Підтвердження права власності на майнo", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Які основні правовстановлюючі документи підтверджують власність на майно?")
 async def quest1_1(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="-  Договір, за яким відповідно до законодавства передбачається перехід права власності, зокрема купівлі-продажу, міни, дарування, довічного утримання, лізингу, предметом якого є нерухоме майно, про припинення права на аліменти для дитини у зв'язку з передачею права власності на нерухоме майно, договір іпотеки, що містить застереження про задоволення вимог іпотекодержателя, договір про задоволення вимог іпотекодержателя, спадковий договір (за наявності свідоцтва органу реєстрації актів цивільного стану про смерть чи рішення суду про оголошення особи померлою), договір про виділ у натурі частки з нерухомого майна, що є у спільній власності, про поділ нерухомого майна, що є у спільній власності.\n"
                                 "-  Свідоцтво про право власності на частку в спільному майні подружжя в разі смерті одного з подружжя, що видається нотаріусом.\n"
@@ -138,7 +142,7 @@ async def quest1_1(message: types.Message):
 
 @dp.message_handler(text="Які документи потрібно зберегти для підтвердження права власності на майно?")
 async def quest1_2(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="-  Договір, за яким відповідно до законодавства передбачається перехід права власності, зокрема купівлі-продажу, міни, дарування, довічного утримання, лізингу, предметом якого є нерухоме майно, про припинення права на аліменти для дитини у зв'язку з передачею права власності на нерухоме майно, договір іпотеки, що містить застереження про задоволення вимог іпотекодержателя, договір про задоволення вимог іпотекодержателя, спадковий договір (за наявності свідоцтва органу реєстрації актів цивільного стану про смерть чи рішення суду про оголошення особи померлою), договір про виділ у натурі частки з нерухомого майна, що є у спільній власності, про поділ нерухомого майна, що є у спільній власності.\n"
                                 "-  Свідоцтво про право власності на частку в спільному майні подружжя в разі смерті одного з подружжя, що видається нотаріусом.\n"
@@ -152,49 +156,49 @@ async def quest1_2(message: types.Message):
 
 @dp.message_handler(text="Чи можна зберігати копії документів про право власності в електронному вигляді?")
 async def quest1_3(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="Так, зробіть декілька примірників копій, які доцільно зберігати в різних місцях) та сканкопії (на різних пристроях та у хмарних сховищах). Це мінімізує ризик їх втрати", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Як поновити втрачені документи на майно?")
 async def quest1_4(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="За можливістю зробіть витяг щодо перебування майна у власності з Державного реєстру речових прав на нерухоме майно (подати запит на отримання інформації через персональний кабінет веб-сайту «Кабінет електронних сервісів» Міністерства юстиції України https://psjust.gov.ua/elektronni-posluhy/elektronni-servisy-on-layn/ або отримати довідку через додаток Дія https://diia.gov.ua/services/informaciya-z-derzhavnogo-reyestru-rechovih-prav-na-neruhome-majno).", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Як зменшити ризик втрати документів?")
 async def quest1_5(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="При можливості, зробіть декілька примірників копій, які доцільно зберігати в різних місцях) та сканкопії (на різних пристроях та у хмарних сховищах). Це мінімізує ризик їх втрати.", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Як отримати інформацію про майно з Державного реєстру речових прав на нерухоме майно?")
 async def quest1_6(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="Подати запит на отримання інформації через персональний кабінет веб-сайту «Кабінет електронних сервісів» Міністерства юстиції України https://psjust.gov.ua/elektronni-posluhy/elektronni-servisy-on-layn/ або отримати довідку через додаток Дія https://diia.gov.ua/services/informaciya-z-derzhavnogo-reyestru-rechovih-prav-na-neruhome-majno).", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Що робити у випадку втрати або пошкодження документа про право власності на майно?")
 async def quest1_7(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="Слід звернутися із письмовою заявою до органу місцевого самоврядування чи нотаріуса для отримання дублікату.", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Як діяти, якщо виникають проблеми з визнанням права власності на майно?")
 async def quest1_8(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="Ви маєте право звернутися до суду для визнання права власності на майно, яке не визнається чи оспорюється.", chat_id=message.from_user.id, reply_markup=mar)
 
 
 @dp.message_handler(text="Якщо є копії документів про право власності чи потрібно відновлювати оригінали?")
 async def quest1_9(message: types.Message):
-    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права вланості на майнo")
+    back = types.KeyboardButton("Назад🔙", callback_data="Підтвердження права власності на майнo")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(back)
     await bot.send_message(text="Так", chat_id=message.from_user.id, reply_markup=mar)
 
