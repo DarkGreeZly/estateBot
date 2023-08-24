@@ -7,7 +7,7 @@ from aiogram.utils.callback_data import CallbackData
 bot = Bot(token="6339639367:AAFfRK1z6yhvaLTq55C8I42lpNUAgTEeGbM")
 dp = Dispatcher(bot)
 inline = CallbackData("post", "action", "data")
-full_name, phone, email, complaint, user, deleting_mes, mess = '', '', '', '', '', types.Message, types.Message
+full_name, phone, email, complaint, user, deleting_mes, mess, channel_id = '', '', '', '', '', types.Message, types.Message, "-1001901159869"
 sent = False
 
 
@@ -83,7 +83,7 @@ async def send_complaint(callback_data: types.CallbackQuery):
         acceptance = types.InlineKeyboardButton("На підтвердження", callback_data="on_acceptance")
         finished = types.InlineKeyboardButton("Виконано", callback_data="finished")
         mar = types.InlineKeyboardMarkup(row_width=2).add(work, handled, acceptance, finished)
-        await bot.send_message("-1001901159869", f"Ім'я, прізвище: {full_name}\n"
+        await bot.send_message(channel_id, f"Ім'я, прізвище: {full_name}\n"
                                                                     f"Номер телефону: {phone}\n"
                                                                     f"Почта: {email}\n"
                                                                     f"Повідомлення: {complaint}", reply_markup=mar)
@@ -101,17 +101,21 @@ async def send_complaint(callback_data: types.CallbackQuery):
 async def channel_handler(callback_data: types.CallbackQuery):
     global sent
     if str(callback_data.data) == "work":
-        await bot.send_message(user, "Статус: В роботі\n"
-                                          f"Менеджер: {callback_data.from_user.full_name}")
+        await bot.send_message(user, "В роботі")
+        await bot.send_message(channel_id, "Статус: В роботі\n"
+                                     f"Менеджер: {callback_data.from_user.full_name}")
     elif str(callback_data.data) == "handled":
-        await bot.send_message(user, "Статус: На обробці\n"
-                                          f"Менеджер: {callback_data.from_user.full_name}")
+        await bot.send_message(user, "На обробці")
+        await bot.send_message(channel_id, "Статус: На обробці\n"
+                                     f"Менеджер: {callback_data.from_user.full_name}")
     elif str(callback_data.data) == "on_acceptance":
-        await bot.send_message(user, "Статус: На затвердженні\n"
-                                          f"Менеджер: {callback_data.from_user.full_name}")
+        await bot.send_message(user, "На затвердженні")
+        await bot.send_message(channel_id, "Статус: На затвердженні\n"
+                                     f"Менеджер: {callback_data.from_user.full_name}")
     elif str(callback_data.data) == "finished":
-        await bot.send_message(user, "Статус: Завершено\n"
-                                          f"Менеджер: {callback_data.from_user.full_name}")
+        await bot.send_message(user, "Завершено")
+        await bot.send_message(channel_id, "Статус: Завершено\n"
+                                     f"Менеджер: {callback_data.from_user.full_name}")
         sent = False
 
 
