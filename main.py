@@ -13,13 +13,13 @@ sent = False
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
-    next = types.KeyboardButton("Розпочати")
+    next = types.KeyboardButton("📲Розпочати")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True).add(next)
-    await bot.send_message(message.from_user.id, "Вас вітає бот «Поверни Своє».\n\n"
+    await bot.send_message(message.from_user.id, "👋🏻Вас вітає бот «Поверни Своє».\n\n"
                                                  "Цей бот дозволить знайти допомогу людям, чиє майно постраждало внаслідок збройної агресії рф проти України.", reply_markup=mar)
 
 
-@dp.message_handler(text="Розпочати")
+@dp.message_handler(text="📲Розпочати")
 @dp.message_handler(text="Назад🔙")
 async def continues(message: types.Message):
     global mess
@@ -39,7 +39,7 @@ async def continues(message: types.Message):
     block13 = types.KeyboardButton("Подання онлайн заявок", callback_data="Подання онлайн заявок")
     support = types.KeyboardButton("Звернутися в підтримку")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(block1, block2, block3, block4, block5, block6, block7, block8, block9, block10, block11, block12, block13, support)
-    await bot.send_message(message.from_user.id, "Виберіть блок який вас цікавить:", reply_markup=mar)
+    await bot.send_message(message.from_user.id, "Виберіть блок, який вас цікавить👇", reply_markup=mar)
 
 
 @dp.message_handler(text="Звернутися в підтримку")
@@ -141,7 +141,7 @@ async def block1(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, quest8, quest9, back)
     if message:
-        await bot.send_message(text="Підтвердження права власності на майнo", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Підтвердження права власності на майнo", chat_id=callback_data.from_user.id,
                                reply_markup=mar)
@@ -217,7 +217,7 @@ async def block2(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, back)
     if message:
-        await bot.send_message(text="Фіксація ДСНС", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Фіксація ДСНС", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -257,7 +257,7 @@ async def block3(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, quest8, back)
     if message:
-        await bot.send_message(text="Фіксація сільською/селищною міською радою, у разі їх відсутності військовою адміністрацією або військово-цивільною адміністрацією", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(
             text="Фіксація сільською/селищною міською радою, у разі їх відсутності військовою адміністрацією або військово-цивільною адміністрацією",
@@ -308,7 +308,7 @@ async def block4(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, back)
     if message:
-        await bot.send_message(text="Фіксація НПУ", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Фіксація НПУ", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -360,7 +360,7 @@ async def block5(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, back)
     if message:
-        await bot.send_message(text="Фіксація державною екологічною інспекцією", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Фіксація державною екологічною інспекцією", chat_id=callback_data.from_user.id,
                                reply_markup=mar)
@@ -423,7 +423,7 @@ async def block6(message: types.Message=None, callback_data:types.CallbackQuery=
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, quest8, quest9, quest10, quest11, quest12, quest13, quest14, back)
     if message:
-        await bot.send_message(text="Самостійна фіксація", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Самостійна фіксація", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -511,7 +511,7 @@ async def block7(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, back)
     if message:
-        await bot.send_message(text="Збір пояснень свідків", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Збір пояснень свідків", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -560,7 +560,7 @@ async def block8(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, back)
     if message:
-        await bot.send_message(text="Збір матеріалів зі ЗМІ", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Збір матеріалів зі ЗМІ", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -611,7 +611,7 @@ async def block9(message: types.Message=None, callback_data: types.CallbackQuery
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, back)
     if message:
-        await bot.send_message(text="Збір  чеків на пошкоджене/зруйноване майно", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Збір  чеків на пошкоджене/зруйноване майно", chat_id=callback_data.from_user.id,
                                reply_markup=mar)
@@ -663,7 +663,7 @@ async def block10(message: types.Message=None, callback_data: types.CallbackQuer
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, quest8, quest9, quest10, back)
     if message:
-        await bot.send_message(text="Збір інформації про підключення комунальних послуг", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Збір інформації про підключення комунальних послуг", chat_id=callback_data.from_user.id,
                                reply_markup=mar)
@@ -734,7 +734,7 @@ async def block11(message: types.Message=None, callback_data: types.CallbackQuer
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, quest4, quest5, quest6, quest7, back)
     if message:
-        await bot.send_message(text="Збереження зібраних матеріалів", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Збереження зібраних матеріалів", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -783,7 +783,7 @@ async def block12(message: types.Message=None, callback_data: types.CallbackQuer
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, quest2, quest3, back)
     if message:
-        await bot.send_message(text="Звернення до НПУ із заявою", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Звернення до НПУ із заявою", chat_id=callback_data.from_user.id, reply_markup=mar)
 
@@ -812,7 +812,7 @@ async def block13(message: types.Message=None, callback_data: types.CallbackQuer
     back = types.KeyboardButton("Назад🔙", callback_data="back")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(quest1, back)
     if message:
-        await bot.send_message(text="Подання онлайн заявок", chat_id=message.from_user.id, reply_markup=mar)
+        await bot.send_message(text="Оберіть питання для отримання консультації👇", chat_id=message.from_user.id, reply_markup=mar)
     else:
         await bot.send_message(text="Подання онлайн заявок", chat_id=callback_data.from_user.id, reply_markup=mar)
 
