@@ -6,7 +6,7 @@ from aiogram.utils import executor
 from aiogram.utils.callback_data import CallbackData
 
 
-bot = Bot(token="6339639367:AAFfRK1z6yhvaLTq55C8I42lpNUAgTEeGbM")
+bot = Bot(token="6261075365:AAHyWCLtWfJ_eR8W44DoCEcxWXs1PXpKoEQ")
 dp = Dispatcher(bot)
 inline = CallbackData("post", "action", "data")
 full_name, phone, email, complaint, user, deleting_mes, mess, channel_id, count = '', '', '', '', '', types.Message, types.Message, "-1001901159869", 0
@@ -19,7 +19,7 @@ texts = json.load(texts_file)
 async def start(message: types.Message):
     next = types.KeyboardButton("📲Розпочати")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True).add(next)
-    await bot.send_message(message.from_user.id, "👋🏻Вас вітає бот «Поверни Своє».\n\n"
+    await bot.send_message(message.from_user.id, "👋🏻Вас вітає бот «Віднови Своє».\n\n"
                                                  "Цей бот дозволить знайти допомогу людям, чиє майно постраждало внаслідок збройної агресії рф проти України.", reply_markup=mar)
 
 
