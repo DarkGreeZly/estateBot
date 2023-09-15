@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime, timedelta
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
@@ -14,13 +14,63 @@ sent = False
 texts_file = open("texts.json")
 texts = json.load(texts_file)
 
+# statistics variables
+question_count = 0
+all_follows = 0
+day_follows = 0
+week_follows = 0
+follows = []
+start_date_week = ""
+start_date_day = ""
+
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
+    global follows, all_follows, day_follows, week_follows
+    if message.from_user.id not in follows:
+        follows.append(message.from_user.id)
+        all_follows += 1
+        day_follows += 1
+        week_follows += 1
     next = types.KeyboardButton("📲Розпочати")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True).add(next)
     await bot.send_message(message.from_user.id, "👋🏻Вас вітає бот «Віднови Своє».\n\n"
                                                  "Цей бот дозволить знайти допомогу людям, чиє майно постраждало внаслідок збройної агресії рф проти України.", reply_markup=mar)
+
+
+@dp.message_handler(text="Статистика")
+async def statistic(message: types.Message):
+    global day_follows, week_follows, start_date_day, start_date_week
+    week_time = start_date_week + timedelta(days=7)
+    day_time = start_date_day + timedelta(hours=24)
+    if start_date_week < week_time and start_date_day < day_time:
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
+                                               f"Кількість людей за 1 день - {day_follows}"
+                                               f"Кількість людей за тиждень - {week_follows}"
+                                               f"Загальна кількість людей - {all_follows}")
+    elif start_date_week < week_time and start_date_day == day_time:
+        start_date_day = day_time
+        day_follows = 0
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
+                                               f"Кількість людей за 1 день - {day_follows}"
+                                               f"Кількість людей за тиждень - {week_follows}"
+                                               f"Загальна кількість людей - {all_follows}")
+    elif start_date_week == week_time and start_date_day < day_time:
+        start_date_week = week_time
+        week_follows = 0
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
+                                               f"Кількість людей за 1 день - {day_follows}"
+                                               f"Кількість людей за тиждень - {week_follows}"
+                                               f"Загальна кількість людей - {all_follows}")
+    else:
+        start_date_day = day_time
+        start_date_week = week_time
+        day_follows = 0
+        week_follows = 0
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
+                                               f"Кількість людей за 1 день - {day_follows}"
+                                               f"Кількість людей за тиждень - {week_follows}"
+                                               f"Загальна кількість людей - {all_follows}")
 
 
 @dp.message_handler(text="📲Розпочати")
@@ -117,26 +167,28 @@ async def send_complaint(callback_data: types.CallbackQuery):
 @dp.callback_query_handler(text="finished")
 async def channel_handler(callback_data: types.CallbackQuery):
     global sent
+    stat = types.KeyboardButton("Статистика")
+    mar = types.ReplyKeyboardMarkup(resize_keyboard=True).add(stat)
     if str(callback_data.data) == "work":
         await bot.send_message(user, "В роботі")
         await bot.send_message(channel_id, f"Заявка {count}\n"
                                             "Статус: В роботі\n"
-                                            f"Менеджер: {callback_data.from_user.full_name}")
+                                            f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
     elif str(callback_data.data) == "handled":
         await bot.send_message(user, "На обробці")
         await bot.send_message(channel_id, f"Заявка {count}\n"
                                             "Статус: На обробці\n"
-                                            f"Менеджер: {callback_data.from_user.full_name}")
+                                            f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
     elif str(callback_data.data) == "on_acceptance":
         await bot.send_message(user, "На затвердженні")
         await bot.send_message(channel_id, f"Заявка {count}\n"
                                             "Статус: На затвердженні\n"
-                                            f"Менеджер: {callback_data.from_user.full_name}")
+                                            f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
     elif str(callback_data.data) == "finished":
         await bot.send_message(user, "Завершено")
         await bot.send_message(channel_id, f"Заявка {count}\n"
                                             "Статус: Завершено\n"
-                                            f"Менеджер: {callback_data.from_user.full_name}")
+                                            f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
         sent = False
 
 
@@ -164,46 +216,64 @@ async def block1(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block1']['questions']['question1'])
 async def quest1_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question2'])
 async def quest1_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question3'])
 async def quest1_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question4'])
 async def quest1_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question5'])
 async def quest1_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question6'])
 async def quest1_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question7'])
 async def quest1_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer7']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question8'])
 async def quest1_8(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer8']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block1']['questions']['question9'])
 async def quest1_9(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block1']['answers']['answer9']), chat_id=message.from_user.id)
 
 
@@ -225,26 +295,36 @@ async def block2(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block2']['questions']['question1'])
 async def quest2_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block2']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block2']['questions']['question2'])
 async def quest2_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block2']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block2']['questions']['question3'])
 async def quest2_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block2']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block2']['questions']['question4'])
 async def quest2_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block2']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block2']['questions']['question5'])
 async def quest2_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block2']['answers']['answer5']), chat_id=message.from_user.id)
 
 
@@ -271,41 +351,57 @@ async def block3(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block3']['questions']['question1'])
 async def quests3_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question2'])
 async def quests3_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question3'])
 async def quests3_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question4'])
 async def quest3_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question5'])
 async def quest3_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question6'])
 async def quest3_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question7'])
 async def quest3_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer7']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block3']['questions']['question8'])
 async def quest3_8(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block3']['answers']['answer8']), chat_id=message.from_user.id)
 
 
@@ -329,36 +425,50 @@ async def block4(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block4']['questions']['question1'])
 async def quest4_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block4']['questions']['question2'])
 async def quest4_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block4']['questions']['question3'])
 async def quest4_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block4']['questions']['question4'])
 async def quest4_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block4']['questions']['question5'])
 async def quest4_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block4']['questions']['question6'])
 async def quest4_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block4']['questions']['question7'])
 async def quest4_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block4']['answers']['answer7']), chat_id=message.from_user.id)
 
 
@@ -382,31 +492,43 @@ async def block5(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block5']['questions']['question1'])
 async def quest5_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block5']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block5']['questions']['question2'])
 async def quest5_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block5']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block5']['questions']['question3'])
 async def quest5_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block5']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block5']['questions']['question4'])
 async def quest5_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block5']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block5']['questions']['question5'])
 async def quest5_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block5']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block5']['questions']['question6'])
 async def quest5_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block5']['answers']['answer6']), chat_id=message.from_user.id)
 
 
@@ -437,71 +559,99 @@ async def block6(message: types.Message=None, callback_data:types.CallbackQuery=
 
 @dp.message_handler(text=texts['block6']['questions']['question1'])
 async def quest6_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question2'])
 async def quest6_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question3'])
 async def quest6_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question4'])
 async def quest6_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question5'])
 async def quest6_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question6'])
 async def quest6_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question7'])
 async def quest6_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer7']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question8'])
 async def quest6_8(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer8']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question9'])
 async def quest6_9(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer9']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question10'])
 async def quest6_10(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer10']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question11'])
 async def quest6_11(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer11']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question12'])
 async def quest6_12(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer12']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question13'])
 async def quest6_13(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer13']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block6']['questions']['question14'])
 async def quest6_14(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block6']['answers']['answer14']), chat_id=message.from_user.id)
 
 
@@ -525,36 +675,50 @@ async def block7(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block7']['questions']['question1'])
 async def quest7_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block7']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block7']['questions']['question2'])
 async def quest7_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block7']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block7']['questions']['question3'])
 async def quest7_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block7']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block7']['questions']['question4'])
 async def quest7_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block7']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block7']['questions']['question5'])
 async def quest7_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block7']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block7']['questions']['question6'])
 async def quest7_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(message.from_user.id, "\n".join(texts['block7']['answers']['answer6']))
 
 
 @dp.message_handler(text=texts['block7']['questions']['question7'])
 async def quest7_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block7']['answers']['answer7']), chat_id=message.from_user.id)
 
 
@@ -578,36 +742,50 @@ async def block8(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block8']['questions']['question1'])
 async def quest8_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block8']['questions']['question2'])
 async def quest8_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block8']['questions']['question3'])
 async def quest8_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block8']['questions']['question4'])
 async def quest8_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block8']['questions']['question5'])
 async def quest8_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block8']['questions']['question6'])
 async def quest8_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block8']['questions']['question7'])
 async def quest8_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block8']['answers']['answer7']), chat_id=message.from_user.id)
 
 
@@ -630,26 +808,36 @@ async def block9(message: types.Message=None, callback_data: types.CallbackQuery
 
 @dp.message_handler(text=texts['block9']['questions']['question1'])
 async def quest9_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block9']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block9']['questions']['question2'])
 async def quest9_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block9']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block9']['questions']['question3'])
 async def quest9_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block9']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block9']['questions']['question4'])
 async def quest9_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block9']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block9']['questions']['question5'])
 async def quest9_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block9']['answers']['answer5']), chat_id=message.from_user.id)
 
 
@@ -677,51 +865,71 @@ async def block10(message: types.Message=None, callback_data: types.CallbackQuer
 
 @dp.message_handler(text=texts['block10']['questions']['question1'])
 async def quest10_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question2'])
 async def quest10_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question3'])
 async def quest10_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question4'])
 async def quest10_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question5'])
 async def quest10_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question6'])
 async def quest10_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question7'])
 async def quest10_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer7']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question8'])
 async def quest10_8(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer8']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question9'])
 async def quest10_9(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer9']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block10']['questions']['question10'])
 async def quest10_10(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block10']['answers']['answer10']), chat_id=message.from_user.id)
 
 
@@ -745,36 +953,50 @@ async def block11(message: types.Message=None, callback_data: types.CallbackQuer
 
 @dp.message_handler(text=texts['block11']['questions']['question1'])
 async def quest11_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block11']['questions']['question2'])
 async def quest11_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block11']['questions']['question3'])
 async def quest11_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer3']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block11']['questions']['question4'])
 async def quest11_4(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer4']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block11']['questions']['question5'])
 async def quest11_5(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer5']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block11']['questions']['question6'])
 async def quest11_6(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer6']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block11']['questions']['question7'])
 async def quest11_7(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block11']['answers']['answer7']), chat_id=message.from_user.id)
 
 
@@ -794,16 +1016,22 @@ async def block12(message: types.Message=None, callback_data: types.CallbackQuer
 
 @dp.message_handler(text=texts['block12']['questions']['question1'])
 async def quest12_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block12']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block12']['questions']['question2'])
 async def quest12_2(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block12']['answers']['answer2']), chat_id=message.from_user.id)
 
 
 @dp.message_handler(text=texts['block12']['questions']['question3'])
 async def quest12_3(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block12']['answers']['answer3']), chat_id=message.from_user.id)
 
 
@@ -821,8 +1049,12 @@ async def block13(message: types.Message=None, callback_data: types.CallbackQuer
 
 @dp.message_handler(text=texts['block13']['questions']['question1'])
 async def quest13_1(message: types.Message):
+    global question_count
+    question_count += 1
     await bot.send_message(text="\n".join(texts['block13']['answers']['answer1']), chat_id=message.from_user.id)
 
 
 if __name__ == "__main__":
+    global start_date_week, start_date_day
+    start_date_day, start_date_week = datetime.now(), datetime.now()
     executor.start_polling(dp)
