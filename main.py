@@ -1055,6 +1055,5 @@ async def quest13_1(message: types.Message):
 
 
 if __name__ == "__main__":
-    global start_date_week, start_date_day
     start_date_day, start_date_week = datetime.now(), datetime.now()
     executor.start_polling(dp)
