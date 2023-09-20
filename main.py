@@ -1,6 +1,8 @@
 import json
 from datetime import datetime, timedelta
-from aiogram import Bot, types, Dispatcher, executor
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
 from aiogram.utils.callback_data import CallbackData
 
 
