@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timedelta
-from aiogram import Bot, types, Dispatcher, executor
+from aiogram import Bot, types, Dispatcher
+from aiogram.utils import executor
 from aiogram.utils.callback_data import CallbackData
 
 
@@ -9,7 +10,7 @@ dp = Dispatcher(bot)
 inline = CallbackData("post", "action", "data")
 full_name, phone, email, complaint, user, deleting_mes, mess, channel_id, count = '', '', '', '', '', types.Message, types.Message, "-1001901159869", 0
 sent = False
-texts_file = open("texts.json")
+texts_file = open("texts.json", encoding="utf-8")
 texts = json.load(texts_file)
 
 # statistics variables
