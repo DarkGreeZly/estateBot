@@ -43,32 +43,32 @@ async def statistic(message: types.Message):
     week_time = start_date_week + timedelta(days=7)
     day_time = start_date_day + timedelta(hours=24)
     if start_date_week < week_time and start_date_day < day_time:
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
-                                               f"Кількість людей за 1 день - {day_follows}"
-                                               f"Кількість людей за тиждень - {week_follows}"
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
+                                               f"Кількість людей за 1 день - {day_follows}\n"
+                                               f"Кількість людей за тиждень - {week_follows}\n"
                                                f"Загальна кількість людей - {all_follows}")
     elif start_date_week < week_time and start_date_day == day_time:
         start_date_day = day_time
         day_follows = 0
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
-                                               f"Кількість людей за 1 день - {day_follows}"
-                                               f"Кількість людей за тиждень - {week_follows}"
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
+                                               f"Кількість людей за 1 день - {day_follows}\n"
+                                               f"Кількість людей за тиждень - {week_follows}\n"
                                                f"Загальна кількість людей - {all_follows}")
     elif start_date_week == week_time and start_date_day < day_time:
         start_date_week = week_time
         week_follows = 0
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
-                                               f"Кількість людей за 1 день - {day_follows}"
-                                               f"Кількість людей за тиждень - {week_follows}"
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
+                                               f"Кількість людей за 1 день - {day_follows}\n"
+                                               f"Кількість людей за тиждень - {week_follows}\n"
                                                f"Загальна кількість людей - {all_follows}")
     else:
         start_date_day = day_time
         start_date_week = week_time
         day_follows = 0
         week_follows = 0
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}"
-                                               f"Кількість людей за 1 день - {day_follows}"
-                                               f"Кількість людей за тиждень - {week_follows}"
+        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
+                                               f"Кількість людей за 1 день - {day_follows}\n"
+                                               f"Кількість людей за тиждень - {week_follows}\n"
                                                f"Загальна кількість людей - {all_follows}")
 
 
