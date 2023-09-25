@@ -142,11 +142,9 @@ async def send_complaint(callback_data: types.CallbackQuery):
     global mess, sent, count
     if not sent:
         sent = True
-        work = types.InlineKeyboardButton("В роботі", callback_data="work")
-        handled = types.InlineKeyboardButton("Оброблено", callback_data="handled")
-        acceptance = types.InlineKeyboardButton("На підтвердження", callback_data="on_acceptance")
+        work = types.InlineKeyboardButton("Прийнято", callback_data="work")
         finished = types.InlineKeyboardButton("Виконано", callback_data="finished")
-        mar = types.InlineKeyboardMarkup(row_width=2).add(work, handled, acceptance, finished)
+        mar = types.InlineKeyboardMarkup(row_width=2).add(work, finished)
         count += 1
         await bot.send_message(channel_id, f"Заявка {count}\n"
                                                 f"Ім'я, прізвище: {full_name}\n"
@@ -161,32 +159,20 @@ async def send_complaint(callback_data: types.CallbackQuery):
 
 
 @dp.callback_query_handler(text="work")
-@dp.callback_query_handler(text="handled")
-@dp.callback_query_handler(text="on_acceptance")
 @dp.callback_query_handler(text="finished")
 async def channel_handler(callback_data: types.CallbackQuery):
     global sent
     stat = types.KeyboardButton("Статистика")
     mar = types.ReplyKeyboardMarkup(resize_keyboard=True).add(stat)
     if str(callback_data.data) == "work":
-        await bot.send_message(user, "В роботі")
+        await bot.send_message(user, "Ваш запит прийнято в роботу")
         await bot.send_message(channel_id, f"Заявка {count}\n"
-                                            "Статус: В роботі\n"
-                                            f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
-    elif str(callback_data.data) == "handled":
-        await bot.send_message(user, "На обробці")
-        await bot.send_message(channel_id, f"Заявка {count}\n"
-                                            "Статус: На обробці\n"
-                                            f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
-    elif str(callback_data.data) == "on_acceptance":
-        await bot.send_message(user, "На затвердженні")
-        await bot.send_message(channel_id, f"Заявка {count}\n"
-                                            "Статус: На затвердженні\n"
+                                            "Статус: Прийнято на виконання\n"
                                             f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
     elif str(callback_data.data) == "finished":
-        await bot.send_message(user, "Завершено")
+        await bot.send_message(user, "Ваш запит виконано")
         await bot.send_message(channel_id, f"Заявка {count}\n"
-                                            "Статус: Завершено\n"
+                                            "Статус: Виконано\n"
                                             f"Менеджер: {callback_data.from_user.full_name}", reply_markup=mar)
         sent = False
 
