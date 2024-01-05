@@ -3,8 +3,24 @@ from datetime import datetime, timedelta
 from aiogram import Bot, types, Dispatcher
 from aiogram.utils import executor
 from aiogram.utils.callback_data import CallbackData
+import sqlite3
 
 
+conn = sqlite3.connect('statistics.db')
+cursor = conn.cursor()
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS statistics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        questions INTEGER NOT NULL,
+        peop_per_day INTEGER NOT NULL,
+        peop_per_week INTEGER NOT NULL,
+        total_count INTEGER NOT NULL
+    )
+''')
+stat_data = (93, 4, 4, 4)
+cursor.execute("INSERT INTO statistics (questions, peop_per_day, peop_per_week, total_count) VALUES (?, ?, ?, ?)", stat_data)
+conn.commit()
 bot = Bot(token="6261075365:AAHyWCLtWfJ_eR8W44DoCEcxWXs1PXpKoEQ")
 dp = Dispatcher(bot)
 inline = CallbackData("post", "action", "data")
@@ -42,34 +58,44 @@ async def statistic(message: types.Message):
     global day_follows, week_follows, start_date_day, start_date_week
     week_time = start_date_week + timedelta(days=7)
     day_time = start_date_day + timedelta(hours=24)
+    cursor.execute("SELECT * FROM statistics")
+    data = cursor.fetchone()
+    questions, peop_per_day, peop_per_week, total_count = data
+    questions += question_count
+    peop_per_day += day_follows
+    peop_per_week += week_follows
+    total_count += all_follows
+    updated_data = (questions, peop_per_day, peop_per_week, total_count)
+    cursor.execute("UPDATE statistics SET questions=?, peop_per_day=?, peop_per_week=?, total_count=?", updated_data)
+    conn.commit()
     if start_date_week < week_time and start_date_day < day_time:
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
-                                               f"Кількість людей за 1 день - {day_follows}\n"
-                                               f"Кількість людей за тиждень - {week_follows}\n"
-                                               f"Загальна кількість людей - {all_follows}")
+        await bot.send_message(channel_id, f"Кількість заданих питань - {questions}\n"
+                                               f"Кількість людей за 1 день - {peop_per_day}\n"
+                                               f"Кількість людей за тиждень - {peop_per_week}\n"
+                                               f"Загальна кількість людей - {total_count}")
     elif start_date_week < week_time and start_date_day == day_time:
         start_date_day = day_time
         day_follows = 0
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
-                                               f"Кількість людей за 1 день - {day_follows}\n"
-                                               f"Кількість людей за тиждень - {week_follows}\n"
-                                               f"Загальна кількість людей - {all_follows}")
+        await bot.send_message(channel_id, f"Кількість заданих питань - {questions}\n"
+                                               f"Кількість людей за 1 день - {peop_per_day}\n"
+                                               f"Кількість людей за тиждень - {peop_per_week}\n"
+                                               f"Загальна кількість людей - {total_count}")
     elif start_date_week == week_time and start_date_day < day_time:
         start_date_week = week_time
         week_follows = 0
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
-                                               f"Кількість людей за 1 день - {day_follows}\n"
-                                               f"Кількість людей за тиждень - {week_follows}\n"
-                                               f"Загальна кількість людей - {all_follows}")
+        await bot.send_message(channel_id, f"Кількість заданих питань - {questions}\n"
+                                               f"Кількість людей за 1 день - {peop_per_day}\n"
+                                               f"Кількість людей за тиждень - {peop_per_week}\n"
+                                               f"Загальна кількість людей - {total_count}")
     else:
         start_date_day = day_time
         start_date_week = week_time
         day_follows = 0
         week_follows = 0
-        await bot.send_message(channel_id, f"Кількість заданих питань - {question_count}\n"
-                                               f"Кількість людей за 1 день - {day_follows}\n"
-                                               f"Кількість людей за тиждень - {week_follows}\n"
-                                               f"Загальна кількість людей - {all_follows}")
+        await bot.send_message(channel_id, f"Кількість заданих питань - {questions}\n"
+                                               f"Кількість людей за 1 день - {peop_per_day}\n"
+                                               f"Кількість людей за тиждень - {peop_per_week}\n"
+                                               f"Загальна кількість людей - {total_count}")
 
 
 @dp.message_handler(text="📲Розпочати")
