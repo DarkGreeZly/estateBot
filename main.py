@@ -60,6 +60,8 @@ async def statistic(message: types.Message):
     day_time = start_date_day + timedelta(hours=24)
     cursor.execute("SELECT * FROM statistics")
     data = cursor.fetchone()
+    data = list(data)
+    data.pop(0)
     questions, peop_per_day, peop_per_week, total_count = data
     questions += question_count
     peop_per_day += day_follows
